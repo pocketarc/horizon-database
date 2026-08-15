@@ -741,8 +741,8 @@ class DatabaseJobRepository implements JobRepository
     /**
      * Get the number of rows to delete per query when trimming.
      *
-     * Trimming deletes in batches so a single statement does not hold row
-     * locks long enough to block jobs being written alongside it.
+     * The trim methods delete in batches so that no single statement holds
+     * row locks long enough to block concurrent writes to the table.
      *
      * @return int
      */

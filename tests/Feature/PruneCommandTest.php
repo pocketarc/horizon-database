@@ -66,7 +66,9 @@ class PruneCommandTest extends TestCase
     public function test_it_trims_in_batches_of_the_configured_size()
     {
         // A smaller chunk must produce strictly more delete statements for the
-        // same rows. Asserting a bare count would pass even without batching.
+        // same rows. One unbatched delete would empty the table just as well,
+        // so the final row count on its own does not show whether the prune
+        // batched.
         $this->assertGreaterThan(
             $this->countDeletesWhilePruning(chunk: 1000),
             $this->countDeletesWhilePruning(chunk: 2),
@@ -74,7 +76,8 @@ class PruneCommandTest extends TestCase
     }
 
     /**
-     * Prune five expired jobs and count the delete statements it took.
+     * Prune five expired jobs and return how many delete statements the
+     * prune command ran.
      */
     protected function countDeletesWhilePruning(int $chunk): int
     {

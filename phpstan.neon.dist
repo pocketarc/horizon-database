@@ -1,5 +1,42 @@
 parameters:
     level: 5
+
     paths:
         - src
+
     treatPhpDocTypesAsCertain: false
+
+    ignoreErrors:
+        # Horizon's contract docblocks do not match Horizon's own Redis
+        # implementations. These repositories match the implementations
+        # because the dashboard consumes what the Redis classes return, not
+        # the types documented in the contracts. Upstream:
+        #   SupervisorRepository::find()       documented array, RedisSupervisorRepository       returns \stdClass|null
+        #   MasterSupervisorRepository::find() documented array, RedisMasterSupervisorRepository returns \stdClass|null
+        #   ProcessRepository::orphaned()      documented array, RedisProcessRepository          returns void
+        #   MetricsRepository::jobsProcessedPerMinute() documented int, RedisMetricsRepository   returns float
+        # Each entry is pinned to a path and a count, so PHPStan still reports
+        # a new mismatch instead of ignoring it here.
+        -
+            identifier: method.childReturnType
+            path: src/Repositories/DatabaseSupervisorRepository.php
+            count: 1
+        -
+            identifier: method.childReturnType
+            path: src/Repositories/DatabaseMasterSupervisorRepository.php
+            count: 1
+        -
+            identifier: method.childReturnType
+            path: src/Repositories/DatabaseProcessRepository.php
+            count: 1
+        -
+            identifier: method.childReturnType
+            path: src/Repositories/DatabaseMetricsRepository.php
+            count: 1
+        # In Horizon\Events\JobFailed, $exception is documented as Exception,
+        # but the value taken from the framework event is a Throwable.
+        # Horizon's own MarshalFailedEvent passes the same value through.
+        -
+            identifier: argument.type
+            path: src/Listeners/MarshalDatabaseFailedEvent.php
+            count: 1
