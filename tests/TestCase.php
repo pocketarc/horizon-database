@@ -136,7 +136,9 @@ abstract class TestCase extends BaseTestCase
     {
         return match (getenv('DB_CONNECTION') ?: 'sqlite') {
             'mysql', 'mariadb' => [
-                'driver' => 'mysql',
+                // Laravel has a dedicated MariaDB driver with its own grammar.
+                // With mysql, the suite would test MySQL's grammar against MariaDB.
+                'driver' => getenv('DB_CONNECTION') === 'mariadb' ? 'mariadb' : 'mysql',
                 'host' => getenv('DB_HOST') ?: '127.0.0.1',
                 'port' => getenv('DB_PORT') ?: '3306',
                 'database' => getenv('DB_DATABASE') ?: 'horizon',

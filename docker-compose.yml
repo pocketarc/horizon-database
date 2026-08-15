@@ -11,6 +11,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      mariadb:
+        condition: service_healthy
       postgres:
         condition: service_healthy
     environment:
@@ -18,6 +20,7 @@ services:
       MYSQL_DATABASE: horizon
       MYSQL_USER: root
       MYSQL_PASSWORD: password
+      MARIADB_HOST: mariadb
       PGSQL_HOST: postgres
       PGSQL_DATABASE: horizon
       PGSQL_USER: horizon
@@ -30,6 +33,18 @@ services:
       MYSQL_DATABASE: horizon
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-ppassword"]
+      interval: 3s
+      timeout: 5s
+      retries: 20
+    stop_grace_period: 1s
+
+  mariadb:
+    image: mariadb:11
+    environment:
+      MARIADB_ROOT_PASSWORD: password
+      MARIADB_DATABASE: horizon
+    healthcheck:
+      test: ["CMD-SHELL", "healthcheck.sh --connect --innodb_initialized"]
       interval: 3s
       timeout: 5s
       retries: 20
